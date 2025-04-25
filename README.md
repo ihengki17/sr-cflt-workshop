@@ -224,7 +224,18 @@ go run .
 2. Back to your **Confluent Cloud Console** and click topic to check **go-test-topic** and check the data contract. 
 
 3. Do you see any difference between the previous producer and new producer?
-4. 
+4. Now try with two different terminal console and go to the **confluent-go** directory to access the **consumer** and **consumer_v2** directory
+```bash
+cd consumer
+go run .
+```
+
+```bash
+cd consumer_v2
+go run .
+```
+
+5. Why both consume can still consume the data even though the producer already change the schema that being produce?
 
 ## <a name="step-8"></a>Clean Up Resources
 
@@ -238,7 +249,7 @@ Deleting the resources you created during this workshop will prevent you from in
 
 *** 
 
-## <a name="step-17"></a>Confluent Resources and Further Testing
+## <a name="step-9"></a>Confluent Resources and Further Testing
 
 Here are some links to check out if you are interested in further testing:
 - [Confluent Cloud Documentation](https://docs.confluent.io/cloud/current/overview.html)
