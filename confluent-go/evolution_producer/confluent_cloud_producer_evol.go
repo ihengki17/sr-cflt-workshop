@@ -81,7 +81,7 @@ func main() {
 	schemaRegistryAPISecret   := os.Getenv("SR_API_SECRET")
 
 	
-	topic := "go-test-topic2"
+	topic := "go-test-topic"
 	createTopic(topic, bootstrapServers, ccloudAPIKey, ccloudAPISecret)
 
 	// Produce a new record to the topic...
