@@ -79,7 +79,7 @@ func main() {
 	schemaRegistryAPIKey      := os.Getenv("SR_API_KEY")
 	schemaRegistryAPISecret   := os.Getenv("SR_API_SECRET")
 
-	topic := "go-test-topic2"
+	topic := "go-test-topic"
 
 	client, err := schemaregistry.NewClient(schemaregistry.NewConfigWithBasicAuthentication(
 		schemaRegistryAPIEndpoint,
