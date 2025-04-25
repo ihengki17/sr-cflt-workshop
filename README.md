@@ -111,7 +111,7 @@ An environment contains clusters and its deployed components such as Apache Flin
 ***
 
 
-## <a name="step-4"></a>Creates Topic and Walk Through Cloud Dashboard
+## <a name="step-3"></a>Creates Topic and Walk Through Cloud Dashboard
 
 1. On the navigation menu, you will see **Cluster Overview**. 
 
@@ -127,7 +127,7 @@ An environment contains clusters and its deployed components such as Apache Flin
 
 2. Click on **Cluster Settings**. This is where you can find your *Cluster ID, Bootstrap Server, Cloud Details, Cluster Type,* and *Capacity Limits*.
 3. On the same navigation menu, select **Topics** and click **Create Topic**. 
-4. Enter **go-test-topic** as the topic name, **3** as the number of partitions, and then click **Create with defaults**. Skip the data contracts as it will be created on the other step. 
+4. Enter **go-test-topic** as the topic name, **1** as the number of partitions, and then click **Create with defaults**. Skip the data contracts as it will be created on the other step. 
 
 <div align="center" padding=25px>
     <img src="images/create-topic1.png" width=50% height=50%>
@@ -147,12 +147,12 @@ An environment contains clusters and its deployed components such as Apache Flin
 6. Below is a look at the topic, **go-test-topic**, but you need to send data to this topic before you see any metrics.
 
 <div align="center" padding=25px>
-    <img src="images/shoe_orders-topic.png" width=75% height=75%>
+    <img src="images/go-test-topic.png" width=75% height=75%>
 </div>
 
 ***
 
-## <a name="step-5"></a>Create an API Key
+## <a name="step-4"></a>Create an API Key Pair
 
 1. Click **API Keys** on the navigation menu. 
 2. Click **Create Key** in order to create your first API Key. If you have an existing API Key select **+ Add Key** to create another API Key.
@@ -164,88 +164,69 @@ An environment contains clusters and its deployed components such as Apache Flin
 3. Select **Global Access** and then click **Next**. 
 4. Copy or save your API Key and Secret somewhere. You will need these later on in the lab, you will not be able to view the secret again once you close this dialogue. 
 5. After creating and saving the API key, you will see this API key in the Confluent Cloud UI in the **API Keys** section. If you don’t see the API key populate right away, refresh the browser.
+6. Go back to the environment page and select Schema Registry (SR) and copy the Schema Registry endpoint
+<div align="center" padding=25px>
+    <img src="images/create-srapikey.png" width=75% height=75%>
+</div>
+<div align="center" padding=25px>
+    <img src="images/create-srapikey2.png" width=75% height=75%>
+</div>
+
+7. Click the API Key to **+Add API Key**
+8. Then copy and save your **SR API Key** and **SR API Secret**.
 
 ***
 
-## <a name="step-6"></a>Connect Flink with Bedrock Model
-The next step is to create a integrated model from AWS Bedrock with Flink on Confluent Cloud.
+## <a name="step-5"></a>Create Kafka Client to Produce and Consume using Schema Registry
 
-1. First, you will create the model connection using Confluent CLI. If you've never installed one, you could install it based on your OS (https://docs.confluent.io/confluent-cli/current/install.html) and login to confluent.
+1. Back to your directory and ensure you already clone the github, acess through terminal to edit your local.env for the endpoint and api key and api secret we have created.
 ```bash
-confluent login
+cd confluent-go
 ```
 
-2. Make sure you prepare your AWS API Key and Secret to create connection to the Bedrock.
+2. Go to first directory **producer** to.
+```bash
+cd producer
+go run .
+```
+
+3. Now check back to the Confluent Cloud Console on the **go-test-topic**.
+
+4. Stop the producer by using **ctrl+c** to continue with next step on Consumer side.
 
 ```bash
-confluent flink connection create my-connection-sg --cloud aws --region ap-southeast-2 --type bedrock --endpoint https://bedrock-runtime.us-west-2.amazonaws.com/model/anthropic.claude-3-sonnet-20240229-v1:0/invoke --aws-access-key <API Key> --aws-secret-key <API Secret>
+cd ../consumer
+go run .
 ```
-
-> **Note:** region input need to be the same region for your Flink environment, only the endpoint for bedrock could cross-region.
-
->Go to **AWS IAM>User** and create User
-<div align="center">
-    <img src="images/bedrock0-1.png" width=100% height=100%>
-</div>
-
->Create User with attach policies for Bedrock Full Access
-<div align="center">
-    <img src="images/bedrock0-2.png" width=100% height=100%>
-</div>
-
-<div align="center">
-    <img src="images/bedrock0-3.png" width=100% height=100%>
-</div>
-
->Create API Key by search your user that has been created and click on the "Create Access Key"
-<div align="center">
-    <img src="images/bedrock0-4.png" width=100% height=100%>
-</div>
-
-<div align="center">
-    <img src="images/bedrock-1.png" width=100% height=100%>
-</div>
-
-<div align="center">
-    <img src="images/bedrock-2.png" width=100% height=100%>
-</div>
-
-3. After creating connection, go back to the Flink SQL Workspace to create the model in Flink before we could invoke on our query.
-```sql
-CREATE MODEL NotificationEngine
-INPUT (loyal_level STRING)
-OUTPUT (promotion STRING)
-WITH (
-  'task' = 'text_generation',
-  'provider' = 'bedrock',
-  'bedrock.PARAMS.max_tokens' = '20000',
-  'bedrock.connection' = 'my-connection',
-  'bedrock.system_prompt' = 'You are an expert in the shoes market. Your task is to create an email for notification to customer of their loyalty level. No preamble needed, only output the Subject and Email Body in different line. Mention Subject word and Email Body word at the beginning of each line. Subject and Email body must be separated by 2 line breaks consistently. Congratulate their status but also inform users about the next level: Climbing needs purchase greater than 7000 to reach Bronze, Bronze needs purchase greater than 70000 to reach Silver, Silver needs purchase greater than 700000 to reach Gold.'
-);
-```
-
-<div align="center">
-    <img src="images/bedrock-3.png" width=100% height=100%>
-</div>
-
-4. Alter the Table as stream/append mode.
-```sql
-ALTER TABLE shoe_loyalty_levels SET ('changelog.mode' = 'append');
-```
-> **Note:** The model will only work with table that using the stream or append mode.
-
-5. Now let's invoke the model and get the results.
-
-```sql
-SELECT email, promotion FROM shoe_loyalty_levels, LATERAL TABLE(ML_PREDICT('NotificationEngine', loyalty_level));
-```
-<div align="center">
-    <img src="images/bedrock-4.png" width=100% height=100%>
-</div>
-
+5. If the consumer running well, it will consume all of the message on the topic with exact schematize data.
 ***
 
-## <a name="step-16"></a>Clean Up Resources
+## <a name="step-6"></a>How Schema Registry handle mismatch format data
+
+1. Back to your directory **confluent-go** and go to the **fake_producer** and run the client.
+```bash
+cd fake_producer
+go run .
+```
+
+2. What is the return after running the client?
+
+3. What makes the client return the error?
+***
+
+## <a name="step-7"></a>How Kafka Client Dynamically evolve the data
+1. Back to your directory **confluent-go** and go to the **evolution_producer** and run the client.
+```bash
+cd evolution_producer
+go run .
+```
+
+2. Back to your **Confluent Cloud Console** and click topic to check **go-test-topic** and check the data contract. 
+
+3. Do you see any difference between the previous producer and new producer?
+4. 
+
+## <a name="step-8"></a>Clean Up Resources
 
 Deleting the resources you created during this workshop will prevent you from incurring additional charges. 
 
