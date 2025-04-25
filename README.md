@@ -46,13 +46,9 @@
 
 <br>
 
-Welcome to “Enable Real-Time Data Transformations and Stream Processing with Apache Flink on Confluent Cloud”! In this workshop, you will learn how to build stream processing applications using Apache Flink on Confluent Cloud as well as learn about the use cases Apache Flink unlocks: streaming ETL, data discovery and enrichment, anomaly detection, and more.
+Welcome to “Confluent Schema Registry Workshop”! In this workshop, you will learn how to build stream processing applications as Kafka Client using Schema Registry on Confluent Cloud.
 
-In this workshop, you will have learned how to leverage Apache Flink to perform continuous transformations, create materialized views, and serve lookups against these materialized views all with the data you already have in Confluent Cloud even connected with Bedrock to leverage your AI Implementation in real-time.
-
-<div align="center" padding=25px>
-    <img src="images/arc.png" width=75% height=75%>
-</div>
+In this workshop, you will have learned how to Stream Governance in Kafka Environment as your stream governance.
 
 ***
 
@@ -71,7 +67,7 @@ In this workshop, you will have learned how to leverage Apache Flink to perform 
 
 ## <a name="step-2"></a>Create an Environment and Cluster
 
-An environment contains clusters and its deployed components such as Apache Flink, Connectors, ksqlDB, and Schema Registry. You have the ability to create different environments based on your company's requirements. For example, you can use environments to separate Development/Testing, Pre-Production, and Production clusters. 
+An environment contains clusters and its deployed components such as Schema Registry. You have the ability to create different environments based on your company's requirements. For example, you can use environments to separate Development/Testing, Pre-Production, and Production clusters. 
 
 1. Click **+ Add cloud environment**. Specify an **Environment Name** and choose the **Essential Package** for stream governance, then Click **Create**. 
 
